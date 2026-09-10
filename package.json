@@ -5,11 +5,13 @@
   "scripts": {
     "dev": "next dev",
     "build": "npm run db:generate && next build",
+    "vercel-build": "prisma generate && prisma db push && prisma db seed && next build",
     "start": "next start",
     "db:generate": "cross-env DATABASE_URL=postgresql://retail_demo:retail_demo_password@localhost:5432/retail_analytics?schema=public prisma generate",
     "db:push": "cross-env DATABASE_URL=postgresql://retail_demo:retail_demo_password@localhost:5432/retail_analytics?schema=public prisma db push",
     "db:migrate": "cross-env DATABASE_URL=postgresql://retail_demo:retail_demo_password@localhost:5432/retail_analytics?schema=public prisma migrate dev",
-    "db:seed": "cross-env DATABASE_URL=postgresql://retail_demo:retail_demo_password@localhost:5432/retail_analytics?schema=public prisma db seed"
+    "db:seed": "cross-env DATABASE_URL=postgresql://retail_demo:retail_demo_password@localhost:5432/retail_analytics?schema=public prisma db seed",
+    "db:seed:reset": "cross-env DATABASE_URL=postgresql://retail_demo:retail_demo_password@localhost:5432/retail_analytics?schema=public SEED_RESET=true prisma db seed"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"

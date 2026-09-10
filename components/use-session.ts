@@ -18,7 +18,7 @@ export function useSession(expectedRole?: Session["role"]) {
       .then((data: Session | null) => {
         if (!data) throw new Error("Not authenticated");
         if (expectedRole && data.role !== expectedRole) {
-          router.replace(data.role === "REGIONAL_MANAGER" ? "/regional-dashboard" : "/store-dashboard");
+          router.replace(data.role === "EXECUTIVE" ? "/executive-dashboard" : data.role === "REGIONAL_MANAGER" ? "/regional-dashboard" : "/store-dashboard");
           return;
         }
         setSession(data);

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { canAccessStore, getSession } from "@/lib/auth";
-import { getStoreDashboard } from "@/lib/dashboard";
+import { getRegionalDashboard, getStoreDashboard } from "@/lib/dashboard";
 import { prisma } from "@/lib/prisma";
 
 export async function GET(_: Request, { params }: { params: Promise<{ id: string }> }) {
@@ -10,5 +10,8 @@ export async function GET(_: Request, { params }: { params: Promise<{ id: string
   const store = await prisma.store.findUnique({ where: { id } });
   if (!store) return NextResponse.json({ message: "Store not found." }, { status: 404 });
   if (!canAccessStore(session, id, store.region)) return NextResponse.json({ message: "You do not have access to this store." }, { status: 403 });
-  return NextResponse.json(await getStoreDashboard(id));
+  const dashboard = await getStoreDashboard(id);
+  if (session.role === "STORE_MANAGER") return NextResponse.json(dashboard);
+  const regional = await getRegionalDashboard(store.region);
+  return NextResponse.json({ ...dashboard, peerStores: regional.stores });
 }

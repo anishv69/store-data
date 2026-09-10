@@ -1,21 +1,16 @@
 # Retail Store Analytics
 
-A full-stack retail sales and inventory demo that connects store-level operations to a live regional view. Store Managers can sell products and manage their location; Regional Managers can compare and drill into every store in their region.
+A full-stack retail sales and inventory demo that connects store transactions to regional and executive reporting. Store Managers operate one location, Regional Managers compare their stores, and a CFO can drill from company totals down to an individual store.
 
 > This is fictional demo data. The project is not affiliated with Apple Inc.
 
 ## Problem statement
 
-Large retailers need store teams to see accurate inventory at the point of sale while regional leaders need those same transactions rolled up immediately. This app demonstrates that business loop in one deployable Next.js application.
+Large retailers need store teams to see accurate inventory at the point of sale while regional and executive leaders need those transactions rolled up immediately. This app demonstrates that business loop in one deployable Next.js application.
 
 ```text
-Regional Manager
-       ↓
-Michigan Region
-       ↓
-Multiple Stores
-       ↓
-Store Manager → Inventory → Sale → Transaction
+Apple Inc → Apple North America → Apple USA → Apple Michigan
+    → Apple Detroit → Individual Store → Sale Transaction
 ```
 
 ## Architecture
@@ -44,6 +39,7 @@ Browser → Next.js UI → Route Handlers → Prisma → PostgreSQL
 - Atomic inventory decrement and transaction creation with oversell protection
 - Searchable, sortable transaction ledger
 - Regional KPIs derived from transactions across four Michigan stores
+- CFO dashboard with company-to-store hierarchical drill-down
 - Sales-by-store and seven-day sales charts
 - Store comparison and regional drill-down views
 - Friendly API validation and responsive desktop/mobile layouts
@@ -52,15 +48,16 @@ Browser → Next.js UI → Route Handlers → Prisma → PostgreSQL
 
 | Role | Email | Password |
 | --- | --- | --- |
-| Store Manager | `store@demo.com` | `password123` |
-| Regional Manager | `regional@demo.com` | `password123` |
+| Store Manager | `store@apple.demo` | `password123` |
+| Regional Manager | `regional@apple.demo` | `password123` |
+| CFO / Executive | `cfo@apple.demo` | `password123` |
 
 Authentication uses a short-lived, HTTP-only demo session cookie. It is intentionally simple and should be replaced with a production identity provider before handling real data.
 
 ## Database schema
 
 - `User`: identity, role, assigned store, and region
-- `Store`: location, region, and manager metadata
+- `Store`: location, manager, and company/area/country/state/market hierarchy
 - `Product`: catalog, SKU, category, and database-owned price
 - `Inventory`: on-hand quantity for a unique store/product pair
 - `Transaction`: immutable sale quantity, unit price, total, store, product, and timestamp
@@ -76,6 +73,8 @@ The conditional update also prevents two concurrent requests from both selling t
 ## How regional aggregation works
 
 Regional results are never manually stored. The API selects all stores in the manager's region and aggregates their transaction amounts and counts. A newly completed store sale therefore appears in both the Store Manager and Regional Manager dashboards on the next request.
+
+Executive results work the same way. `Apple Inc`, `Apple North America`, `Apple USA`, `Apple Michigan`, and `Apple Detroit` are organizational dimensions attached to stores. Every higher-level KPI is derived from the transactions of its contributing stores; no company-level sales total is stored separately.
 
 ## Local setup
 
@@ -112,7 +111,7 @@ npx prisma migrate dev --name init
 npm run db:seed
 ```
 
-The seed creates 2 users, 4 stores, 8 products, inventory at every store, and 44 historical transactions.
+The seed creates three primary role accounts (plus backwards-compatible demo aliases), 4 stores, 8 products, inventory at every store, and 44 historical transactions.
 
 ### Run
 
@@ -141,6 +140,7 @@ npm start
 | POST | `/api/sales` | Atomically complete a sale |
 | GET | `/api/dashboard/store/:id` | Store dashboard aggregation |
 | GET | `/api/dashboard/region/:region` | Regional dashboard aggregation |
+| GET | `/api/dashboard/executive` | Company-to-market executive aggregation |
 
 ## Vercel deployment
 
@@ -148,7 +148,7 @@ npm start
 2. Provision a managed PostgreSQL database (for example Neon, Supabase, or Vercel Marketplace Postgres).
 3. Add `DATABASE_URL` in the Vercel project settings. No `.env` file is used.
 4. Apply the schema and seed from a trusted development/CI environment.
-5. Deploy. Vercel runs `npm run build`, which generates Prisma Client before the Next.js build.
+5. Deploy. Vercel runs `vercel-build`, which safely applies the schema, idempotently adds missing demo data, and builds Next.js. Existing sales and inventory quantities are preserved.
 
 For production releases, commit generated Prisma migrations and run `prisma migrate deploy` in a controlled deployment step.
 

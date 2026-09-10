@@ -18,7 +18,7 @@ export async function getSession(): Promise<Session | null> {
 }
 
 export function canAccessStore(session: Session, storeId: number, storeRegion?: string) {
-  return session.role === "STORE_MANAGER"
-    ? session.storeId === storeId
-    : Boolean(session.region && storeRegion && session.region === storeRegion);
+  if (session.role === "EXECUTIVE") return true;
+  if (session.role === "STORE_MANAGER") return session.storeId === storeId;
+  return Boolean(session.region && storeRegion && session.region === storeRegion);
 }

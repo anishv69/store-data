@@ -10,6 +10,7 @@ datasource db {
 enum Role {
   STORE_MANAGER
   REGIONAL_MANAGER
+  EXECUTIVE
 }
 
 model User {
@@ -29,6 +30,11 @@ model Store {
   city         String
   state        String
   region       String
+  company      String        @default("Apple Inc")
+  area         String        @default("Apple North America")
+  countryGroup String        @default("Apple USA")
+  stateGroup   String        @default("Apple Michigan")
+  market       String        @default("Apple Detroit")
   managerName  String
   createdAt    DateTime      @default(now())
   users        User[]

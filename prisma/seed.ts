@@ -4,10 +4,18 @@ import bcrypt from "bcryptjs";
 const prisma = new PrismaClient();
 
 const storeData = [
-  { name: "Somerset Collection", city: "Troy", state: "Michigan", region: "Michigan", managerName: "Olivia Chen" },
-  { name: "Twelve Oaks Mall", city: "Novi", state: "Michigan", region: "Michigan", managerName: "Marcus Reed" },
-  { name: "Partridge Creek", city: "Clinton Township", state: "Michigan", region: "Michigan", managerName: "Sophia Patel" },
-  { name: "Ann Arbor", city: "Ann Arbor", state: "Michigan", region: "Michigan", managerName: "Ethan Brooks" },
+  { name: "Somerset Collection", city: "Troy", state: "Michigan", region: "Michigan", company: "Apple Inc", area: "Apple North America", countryGroup: "Apple USA", stateGroup: "Apple Michigan", market: "Apple Detroit", managerName: "Olivia Chen" },
+  { name: "Twelve Oaks Mall", city: "Novi", state: "Michigan", region: "Michigan", company: "Apple Inc", area: "Apple North America", countryGroup: "Apple USA", stateGroup: "Apple Michigan", market: "Apple Detroit", managerName: "Marcus Reed" },
+  { name: "Partridge Creek", city: "Clinton Township", state: "Michigan", region: "Michigan", company: "Apple Inc", area: "Apple North America", countryGroup: "Apple USA", stateGroup: "Apple Michigan", market: "Apple Detroit", managerName: "Sophia Patel" },
+  { name: "Ann Arbor", city: "Ann Arbor", state: "Michigan", region: "Michigan", company: "Apple Inc", area: "Apple North America", countryGroup: "Apple USA", stateGroup: "Apple Michigan", market: "Apple Ann Arbor", managerName: "Ethan Brooks" },
+  { name: "Woodland Mall", city: "Grand Rapids", state: "Michigan", region: "Michigan", company: "Apple Inc", area: "Apple North America", countryGroup: "Apple USA", stateGroup: "Apple Michigan", market: "Apple Grand Rapids", managerName: "Maya Thompson" },
+  { name: "Eastwood Towne Center", city: "Lansing", state: "Michigan", region: "Michigan", company: "Apple Inc", area: "Apple North America", countryGroup: "Apple USA", stateGroup: "Apple Michigan", market: "Apple Lansing", managerName: "Noah Wilson" },
+  { name: "Fifth Avenue", city: "New York", state: "New York", region: "New York", company: "Apple Inc", area: "Apple North America", countryGroup: "Apple USA", stateGroup: "Apple New York", market: "Apple New York City", managerName: "Ava Rodriguez" },
+  { name: "SoHo", city: "New York", state: "New York", region: "New York", company: "Apple Inc", area: "Apple North America", countryGroup: "Apple USA", stateGroup: "Apple New York", market: "Apple New York City", managerName: "Liam Scott" },
+  { name: "The Grove", city: "Los Angeles", state: "California", region: "California", company: "Apple Inc", area: "Apple North America", countryGroup: "Apple USA", stateGroup: "Apple California", market: "Apple Los Angeles", managerName: "Emma Garcia" },
+  { name: "Union Square", city: "San Francisco", state: "California", region: "California", company: "Apple Inc", area: "Apple North America", countryGroup: "Apple USA", stateGroup: "Apple California", market: "Apple Bay Area", managerName: "Lucas Kim" },
+  { name: "Eaton Centre", city: "Toronto", state: "Ontario", region: "Ontario", company: "Apple Inc", area: "Apple North America", countryGroup: "Apple Canada", stateGroup: "Apple Ontario", market: "Apple Toronto", managerName: "Amelia Martin" },
+  { name: "Pacific Centre", city: "Vancouver", state: "British Columbia", region: "British Columbia", company: "Apple Inc", area: "Apple North America", countryGroup: "Apple Canada", stateGroup: "Apple British Columbia", market: "Apple Vancouver", managerName: "Benjamin Lee" },
 ];
 
 const productData = [
@@ -19,56 +27,99 @@ const productData = [
   { name: "Apple Watch", sku: "AW", category: "Wearable", price: 499 },
   { name: "AirPods Pro", sku: "APP", category: "Audio", price: 249 },
   { name: "AirPods Max", sku: "APM", category: "Audio", price: 549 },
+  { name: "Vision Pro", sku: "VP", category: "Spatial", price: 3499 },
+  { name: "Studio Display", sku: "SD", category: "Display", price: 1599 },
+  { name: "HomePod mini", sku: "HPM", category: "Home", price: 99 },
+  { name: "Apple TV 4K", sku: "ATV4K", category: "Home", price: 149 },
 ];
 
-const stock = [
-  [100, 120, 40, 55, 60, 80, 150, 12],
-  [88, 105, 31, 47, 52, 74, 132, 27],
-  [64, 91, 24, 38, 44, 63, 118, 18],
-  [72, 98, 29, 43, 49, 69, 126, 22],
-];
+const startingStock = (storeIndex: number, productIndex: number) =>
+  18 + ((storeIndex * 23 + productIndex * 17 + 31) % 128);
 
 async function main() {
-  await prisma.transaction.deleteMany();
-  await prisma.inventory.deleteMany();
-  await prisma.user.deleteMany();
-  await prisma.product.deleteMany();
-  await prisma.store.deleteMany();
+  if (process.env.SEED_RESET === "true") {
+    await prisma.transaction.deleteMany();
+    await prisma.inventory.deleteMany();
+    await prisma.user.deleteMany();
+    await prisma.product.deleteMany();
+    await prisma.store.deleteMany();
+  }
 
   const stores = [];
-  for (const item of storeData) stores.push(await prisma.store.create({ data: item }));
+  for (const item of storeData) {
+    const existing = await prisma.store.findFirst({ where: { name: item.name } });
+    stores.push(existing
+      ? await prisma.store.update({ where: { id: existing.id }, data: item })
+      : await prisma.store.create({ data: item }));
+  }
   const products = [];
-  for (const item of productData) products.push(await prisma.product.create({ data: item }));
+  for (const item of productData) {
+    products.push(await prisma.product.upsert({ where: { sku: item.sku }, update: item, create: item }));
+  }
 
   for (let s = 0; s < stores.length; s++) {
     for (let p = 0; p < products.length; p++) {
-      await prisma.inventory.create({ data: { storeId: stores[s].id, productId: products[p].id, quantity: stock[s][p] } });
+      await prisma.inventory.upsert({
+        where: { storeId_productId: { storeId: stores[s].id, productId: products[p].id } },
+        update: {},
+        create: { storeId: stores[s].id, productId: products[p].id, quantity: startingStock(s, p) },
+      });
     }
   }
 
   const password = await bcrypt.hash("password123", 10);
-  await prisma.user.create({
-    data: { name: "Olivia Chen", email: "store@demo.com", password, role: Role.STORE_MANAGER, storeId: stores[0].id, region: "Michigan" },
+  await prisma.user.upsert({
+    where: { email: "store@demo.com" },
+    update: { role: Role.STORE_MANAGER, storeId: stores[0].id, region: "Michigan", password },
+    create: { name: "Olivia Chen", email: "store@demo.com", password, role: Role.STORE_MANAGER, storeId: stores[0].id, region: "Michigan" },
   });
-  await prisma.user.create({
-    data: { name: "Jordan Williams", email: "regional@demo.com", password, role: Role.REGIONAL_MANAGER, region: "Michigan" },
+  await prisma.user.upsert({
+    where: { email: "regional@demo.com" },
+    update: { role: Role.REGIONAL_MANAGER, region: "Michigan", password },
+    create: { name: "Jordan Williams", email: "regional@demo.com", password, role: Role.REGIONAL_MANAGER, region: "Michigan" },
+  });
+  await prisma.user.upsert({
+    where: { email: "cfo@demo.com" },
+    update: { role: Role.EXECUTIVE, password },
+    create: { name: "Taylor Morgan", email: "cfo@demo.com", password, role: Role.EXECUTIVE },
+  });
+  await prisma.user.upsert({
+    where: { email: "store@apple.demo" },
+    update: { role: Role.STORE_MANAGER, storeId: stores[0].id, region: "Michigan", password },
+    create: { name: "Olivia Chen", email: "store@apple.demo", password, role: Role.STORE_MANAGER, storeId: stores[0].id, region: "Michigan" },
+  });
+  await prisma.user.upsert({
+    where: { email: "regional@apple.demo" },
+    update: { role: Role.REGIONAL_MANAGER, region: "Michigan", password },
+    create: { name: "Jordan Williams", email: "regional@apple.demo", password, role: Role.REGIONAL_MANAGER, region: "Michigan" },
+  });
+  await prisma.user.upsert({
+    where: { email: "cfo@apple.demo" },
+    update: { role: Role.EXECUTIVE, password },
+    create: { name: "Taylor Morgan", email: "cfo@apple.demo", password, role: Role.EXECUTIVE },
   });
 
-  const now = new Date();
-  for (let i = 0; i < 44; i++) {
-    const storeIndex = i % stores.length;
-    const productIndex = (i * 3 + storeIndex) % products.length;
-    const createdAt = new Date(now);
-    createdAt.setDate(now.getDate() - (i % 27));
-    createdAt.setHours(9 + (i % 10), (i * 7) % 60, 0, 0);
-    const quantity = (i % 4) + 1;
-    const unitPrice = productData[productIndex].price;
-    await prisma.transaction.create({
-      data: { storeId: stores[storeIndex].id, productId: products[productIndex].id, quantity, unitPrice, totalAmount: unitPrice * quantity, createdAt },
-    });
+  const transactionTarget = 2400;
+  const existingTransactions = await prisma.transaction.count();
+  if (existingTransactions < transactionTarget) {
+    const now = new Date();
+    const transactions = [];
+    for (let i = existingTransactions; i < transactionTarget; i++) {
+      const ageInDays = i % 180;
+      const storeIndex = (i * 7 + ageInDays) % stores.length;
+      const productIndex = (i * 5 + storeIndex + Math.floor(i / stores.length)) % products.length;
+      const createdAt = new Date(now);
+      createdAt.setDate(now.getDate() - ageInDays);
+      createdAt.setHours(9 + (i % 11), (i * 13) % 60, 0, 0);
+      const quantity = 1 + ((i * 3 + productIndex) % 4);
+      const unitPrice = productData[productIndex].price;
+      transactions.push({ storeId: stores[storeIndex].id, productId: products[productIndex].id, quantity, unitPrice, totalAmount: unitPrice * quantity, createdAt });
+    }
+    await prisma.transaction.createMany({ data: transactions });
   }
+
+  console.log("Demo hierarchy, accounts, inventory, and six months of sales history are ready.");
 }
 
 main()
-  .then(() => console.log("Seeded 2 users, 4 stores, 8 products, 32 inventories, and 44 transactions."))
   .finally(() => prisma.$disconnect());
