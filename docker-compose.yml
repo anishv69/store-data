@@ -1,0 +1,21 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: retail-analytics-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: retail_analytics
+      POSTGRES_USER: retail_demo
+      POSTGRES_PASSWORD: retail_demo_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - retail_analytics_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U retail_demo -d retail_analytics"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  retail_analytics_data:

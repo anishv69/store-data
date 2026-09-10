@@ -1,0 +1,75 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  STORE_MANAGER
+  REGIONAL_MANAGER
+}
+
+model User {
+  id       Int    @id @default(autoincrement())
+  name     String
+  email    String @unique
+  password String
+  role     Role
+  storeId  Int?
+  region   String?
+  store    Store? @relation(fields: [storeId], references: [id])
+}
+
+model Store {
+  id           Int           @id @default(autoincrement())
+  name         String
+  city         String
+  state        String
+  region       String
+  managerName  String
+  createdAt    DateTime      @default(now())
+  users        User[]
+  inventory    Inventory[]
+  transactions Transaction[]
+}
+
+model Product {
+  id           Int           @id @default(autoincrement())
+  name         String
+  sku          String        @unique
+  category     String
+  price        Decimal       @db.Decimal(10, 2)
+  createdAt    DateTime      @default(now())
+  inventory    Inventory[]
+  transactions Transaction[]
+}
+
+model Inventory {
+  id        Int      @id @default(autoincrement())
+  storeId   Int
+  productId Int
+  quantity  Int
+  updatedAt DateTime @updatedAt
+  store     Store    @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([storeId, productId])
+}
+
+model Transaction {
+  id          Int      @id @default(autoincrement())
+  storeId     Int
+  productId   Int
+  quantity    Int
+  unitPrice   Decimal  @db.Decimal(10, 2)
+  totalAmount Decimal  @db.Decimal(12, 2)
+  createdAt   DateTime @default(now())
+  store       Store    @relation(fields: [storeId], references: [id], onDelete: Restrict)
+  product     Product  @relation(fields: [productId], references: [id], onDelete: Restrict)
+
+  @@index([storeId, createdAt])
+  @@index([productId, createdAt])
+}
