@@ -36,6 +36,24 @@ export type ExecutiveOption = { level: ExecutiveLevel; value: string; label: str
 export type RegionComparison = { name: string; sales: number; transactions: number; averageOrderValue: number; inventory: number; storeCount: number };
 export type StoreComparison = { id: number; name: string; city: string; state: string; region: string; sales: number; transactions: number; averageOrderValue: number; inventory: number };
 
+export type AggregationFilters = { state?: string; city?: string; product?: string };
+export type AggregationMetrics = {
+  totalRevenue: number;
+  totalQuantity: number;
+  transactionCount: number;
+  averageTransactionAmount: number;
+  storeCount: number;
+  productCount: number;
+};
+export type AggregationBreakdown = AggregationMetrics & { key: string; label: string };
+export type AggregationResponse = {
+  filters: { state: string | null; city: string | null; product: string | null };
+  summary: AggregationMetrics;
+  byState: AggregationBreakdown[];
+  byCity: AggregationBreakdown[];
+  byProduct: AggregationBreakdown[];
+};
+
 export type ExecutiveDashboard = {
   level: ExecutiveLevel;
   label: string;

@@ -9,6 +9,7 @@ import { OperationsChart, RevenueMixChart, SalesTrendChart, StoreSalesChart, Top
 import { LoadingScreen } from "@/components/loading-screen";
 import { MetricCard } from "@/components/metric-card";
 import { EditorialHero } from "@/components/editorial-hero";
+import { AggregationExplorer } from "@/components/aggregation-explorer";
 import { useSession } from "@/components/use-session";
 import { compactCurrency, currency } from "@/lib/format";
 import type { ExecutiveDashboard, ExecutiveLevel } from "@/types";
@@ -99,6 +100,8 @@ function ExecutiveContent() {
         <div className="border-b border-[#e8e8ed] p-5"><p className="text-sm font-semibold">Company store leaderboard</p><p className="mt-1 text-xs text-[#86868b]">Compare sales, average order value, inventory, and open any store’s detailed analysis.</p></div>
         <div className="table-wrap"><table className="data-table"><thead><tr><th>Store</th><th>Region</th><th>Sales</th><th>Avg. order</th><th>Inventory</th><th></th></tr></thead><tbody>{data.storeComparison.map((store) => <tr key={store.id}><td><p className="font-semibold">{store.name}</p><p className="mt-1 text-xs text-[#86868b]">{store.city}, {store.state}</p></td><td>{store.region}</td><td className="font-semibold">{currency(store.sales)}</td><td>{currency(store.averageOrderValue)}</td><td>{store.inventory.toLocaleString()} units</td><td className="text-right!"><Link href={`/stores/${store.id}`} className="text-xs font-semibold text-[#0071e3]">Analyze</Link></td></tr>)}</tbody></table></div>
       </section>
+
+      <AggregationExplorer title="Flexible sales aggregation" description="Filter independently by state, city, or product, or combine all three. Select a result to move from state to city to product." />
 
       {data.children.length > 0 && (
         <section className="panel mt-5 overflow-hidden">

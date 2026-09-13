@@ -40,6 +40,10 @@ model Store {
   users        User[]
   inventory    Inventory[]
   transactions Transaction[]
+
+  @@index([state, city])
+  @@index([city])
+  @@index([region])
 }
 
 model Product {
@@ -51,6 +55,8 @@ model Product {
   createdAt    DateTime      @default(now())
   inventory    Inventory[]
   transactions Transaction[]
+
+  @@index([name])
 }
 
 model Inventory {

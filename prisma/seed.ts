@@ -16,6 +16,21 @@ const storeData = [
   { name: "Union Square", city: "San Francisco", state: "California", region: "California", company: "Apple Inc", area: "Apple North America", countryGroup: "Apple USA", stateGroup: "Apple California", market: "Apple Bay Area", managerName: "Lucas Kim" },
   { name: "Eaton Centre", city: "Toronto", state: "Ontario", region: "Ontario", company: "Apple Inc", area: "Apple North America", countryGroup: "Apple Canada", stateGroup: "Apple Ontario", market: "Apple Toronto", managerName: "Amelia Martin" },
   { name: "Pacific Centre", city: "Vancouver", state: "British Columbia", region: "British Columbia", company: "Apple Inc", area: "Apple North America", countryGroup: "Apple Canada", stateGroup: "Apple British Columbia", market: "Apple Vancouver", managerName: "Benjamin Lee" },
+  { name: "Downtown Detroit", city: "Detroit", state: "Michigan", region: "Michigan", company: "Apple Inc", area: "Apple North America", countryGroup: "Apple USA", stateGroup: "Apple Michigan", market: "Apple Detroit", managerName: "Harper Davis" },
+  { name: "NorthPark Center", city: "Dallas", state: "Texas", region: "Texas", company: "Apple Inc", area: "Apple North America", countryGroup: "Apple USA", stateGroup: "Apple Texas", market: "Apple Dallas", managerName: "Elijah Martinez" },
+  { name: "The Domain", city: "Austin", state: "Texas", region: "Texas", company: "Apple Inc", area: "Apple North America", countryGroup: "Apple USA", stateGroup: "Apple Texas", market: "Apple Austin", managerName: "Isabella Clark" },
+  { name: "Aventura", city: "Miami", state: "Florida", region: "Florida", company: "Apple Inc", area: "Apple North America", countryGroup: "Apple USA", stateGroup: "Apple Florida", market: "Apple Miami", managerName: "James Lewis" },
+  { name: "Florida Mall", city: "Orlando", state: "Florida", region: "Florida", company: "Apple Inc", area: "Apple North America", countryGroup: "Apple USA", stateGroup: "Apple Florida", market: "Apple Orlando", managerName: "Charlotte Walker" },
+  { name: "Michigan Avenue", city: "Chicago", state: "Illinois", region: "Illinois", company: "Apple Inc", area: "Apple North America", countryGroup: "Apple USA", stateGroup: "Apple Illinois", market: "Apple Chicago", managerName: "Henry Hall" },
+  { name: "University Village", city: "Seattle", state: "Washington", region: "Washington", company: "Apple Inc", area: "Apple North America", countryGroup: "Apple USA", stateGroup: "Apple Washington", market: "Apple Seattle", managerName: "Mia Allen" },
+  { name: "Boylston Street", city: "Boston", state: "Massachusetts", region: "Massachusetts", company: "Apple Inc", area: "Apple North America", countryGroup: "Apple USA", stateGroup: "Apple Massachusetts", market: "Apple Boston", managerName: "Alexander Young" },
+  { name: "Cherry Creek", city: "Denver", state: "Colorado", region: "Colorado", company: "Apple Inc", area: "Apple North America", countryGroup: "Apple USA", stateGroup: "Apple Colorado", market: "Apple Denver", managerName: "Evelyn Hernandez" },
+  { name: "Lenox Square", city: "Atlanta", state: "Georgia", region: "Georgia", company: "Apple Inc", area: "Apple North America", countryGroup: "Apple USA", stateGroup: "Apple Georgia", market: "Apple Atlanta", managerName: "Daniel King" },
+  { name: "Scottsdale Quarter", city: "Scottsdale", state: "Arizona", region: "Arizona", company: "Apple Inc", area: "Apple North America", countryGroup: "Apple USA", stateGroup: "Apple Arizona", market: "Apple Phoenix", managerName: "Sofia Wright" },
+  { name: "Tysons Corner", city: "McLean", state: "Virginia", region: "Virginia", company: "Apple Inc", area: "Apple North America", countryGroup: "Apple USA", stateGroup: "Apple Virginia", market: "Apple Washington DC", managerName: "Jackson Lopez" },
+  { name: "Short Hills", city: "Short Hills", state: "New Jersey", region: "New Jersey", company: "Apple Inc", area: "Apple North America", countryGroup: "Apple USA", stateGroup: "Apple New Jersey", market: "Apple North Jersey", managerName: "Camila Hill" },
+  { name: "King of Prussia", city: "King of Prussia", state: "Pennsylvania", region: "Pennsylvania", company: "Apple Inc", area: "Apple North America", countryGroup: "Apple USA", stateGroup: "Apple Pennsylvania", market: "Apple Philadelphia", managerName: "Sebastian Green" },
+  { name: "Mall of America", city: "Bloomington", state: "Minnesota", region: "Minnesota", company: "Apple Inc", area: "Apple North America", countryGroup: "Apple USA", stateGroup: "Apple Minnesota", market: "Apple Minneapolis", managerName: "Luna Adams" },
 ];
 
 const productData = [
@@ -99,26 +114,28 @@ async function main() {
     create: { name: "Taylor Morgan", email: "cfo@apple.demo", password, role: Role.EXECUTIVE },
   });
 
-  const transactionTarget = 2400;
-  const existingTransactions = await prisma.transaction.count();
-  if (existingTransactions < transactionTarget) {
-    const now = new Date();
-    const transactions = [];
-    for (let i = existingTransactions; i < transactionTarget; i++) {
-      const ageInDays = i % 180;
-      const storeIndex = (i * 7 + ageInDays) % stores.length;
-      const productIndex = (i * 5 + storeIndex + Math.floor(i / stores.length)) % products.length;
+  const minimumTransactionsPerStore = 260;
+  const countsByStore = await prisma.transaction.groupBy({ by: ["storeId"], _count: true });
+  const existingCountMap = new Map(countsByStore.map((row) => [row.storeId, row._count]));
+  const now = new Date();
+  const transactions = [];
+  for (let storeIndex = 0; storeIndex < stores.length; storeIndex++) {
+    const existingCount = existingCountMap.get(stores[storeIndex].id) ?? 0;
+    const transactionTarget = minimumTransactionsPerStore + ((storeIndex * 47) % 181);
+    for (let i = existingCount; i < transactionTarget; i++) {
+      const ageInDays = (i * 11 + storeIndex * 7) % 180;
+      const productIndex = (i * 5 + storeIndex * 3) % products.length;
       const createdAt = new Date(now);
       createdAt.setDate(now.getDate() - ageInDays);
-      createdAt.setHours(9 + (i % 11), (i * 13) % 60, 0, 0);
-      const quantity = 1 + ((i * 3 + productIndex) % 4);
+      createdAt.setHours(9 + ((i + storeIndex) % 11), (i * 13 + storeIndex * 5) % 60, 0, 0);
+      const quantity = 1 + ((i * 3 + productIndex + storeIndex) % 4);
       const unitPrice = productData[productIndex].price;
       transactions.push({ storeId: stores[storeIndex].id, productId: products[productIndex].id, quantity, unitPrice, totalAmount: unitPrice * quantity, createdAt });
     }
-    await prisma.transaction.createMany({ data: transactions });
   }
+  if (transactions.length) await prisma.transaction.createMany({ data: transactions });
 
-  console.log("Demo hierarchy, accounts, inventory, and six months of sales history are ready.");
+  console.log(`Demo data ready: ${stores.length} stores with varied six-month history and at least ${minimumTransactionsPerStore} transactions each.`);
 }
 
 main()
