@@ -71,3 +71,49 @@ export type ExecutiveDashboard = {
   regionComparison: RegionComparison[];
   storeComparison: StoreComparison[];
 };
+
+export type InsuranceRequirement = "STATUTORY" | "CONTRACTUAL" | "GOVERNANCE" | "RISK_MANAGEMENT";
+export type InsuranceFinancing = "CAPTIVE" | "COMMERCIAL" | "HYBRID" | "STATE_PROGRAM";
+export type InsurancePolicyStatus = "ACTIVE" | "RENEWAL_DUE" | "EXPIRED";
+
+export type InsurancePolicy = {
+  id: number;
+  policyCode: string;
+  company: string;
+  coverageName: string;
+  category: string;
+  requirement: InsuranceRequirement;
+  financing: InsuranceFinancing;
+  geography: string;
+  coverageLimit: number;
+  retainedAmount: number;
+  annualPremium: number;
+  effectiveDate: string;
+  expirationDate: string;
+  status: InsurancePolicyStatus;
+  description: string;
+};
+
+export type InsuranceDashboard = {
+  filters: {
+    category: string | null;
+    requirement: InsuranceRequirement | null;
+    status: InsurancePolicyStatus | null;
+  };
+  options: {
+    categories: string[];
+    requirements: InsuranceRequirement[];
+    statuses: InsurancePolicyStatus[];
+  };
+  summary: {
+    policyCount: number;
+    activePolicies: number;
+    renewalDue: number;
+    totalCoverageLimit: number;
+    totalRetainedAmount: number;
+    totalAnnualPremium: number;
+  };
+  byCategory: { name: string; policies: number; coverageLimit: number; annualPremium: number }[];
+  byRequirement: { name: InsuranceRequirement; policies: number; coverageLimit: number; annualPremium: number }[];
+  policies: InsurancePolicy[];
+};

@@ -1,6 +1,6 @@
 # Retail Store Analytics
 
-A full-stack retail sales and inventory demo that connects store transactions to regional and executive reporting. Store Managers operate one location, Regional Managers compare their stores, and a CFO can drill from company totals down to an individual store.
+A full-stack retail sales, inventory, and insurance demo that connects store transactions to regional and executive reporting. Store Managers operate one location, Regional Managers compare their stores, and a CFO can analyze company performance and an illustrative insurance portfolio.
 
 > This is fictional demo data. The project is not affiliated with Apple Inc.
 
@@ -40,6 +40,8 @@ Browser → Next.js UI → Route Handlers → Prisma → PostgreSQL
 - Searchable, sortable transaction ledger
 - Regional KPIs derived from transactions across four Michigan stores
 - CFO dashboard with company-to-store hierarchical drill-down
+- Executive insurance dashboard with category, requirement, and status filters
+- Illustrative statutory, contractual, governance, and risk-management policy register
 - Sales-by-store and seven-day sales charts
 - Store comparison and regional drill-down views
 - Friendly API validation and responsive desktop/mobile layouts
@@ -61,6 +63,7 @@ Authentication uses a short-lived, HTTP-only demo session cookie. It is intentio
 - `Product`: catalog, SKU, category, and database-owned price
 - `Inventory`: on-hand quantity for a unique store/product pair
 - `Transaction`: immutable sale quantity, unit price, total, store, product, and timestamp
+- `InsurancePolicy`: illustrative coverage, financing, limit, retention, premium, dates, and status
 
 The composite `Inventory(storeId, productId)` key is unique.
 
@@ -111,7 +114,7 @@ npx prisma migrate dev --name init
 npm run db:seed
 ```
 
-The seed creates three primary role accounts (plus backwards-compatible demo aliases), 4 stores, 8 products, inventory at every store, and 44 historical transactions.
+The seed creates three primary role accounts (plus backwards-compatible demo aliases), 27 stores, 12 products, inventory and sales history at every store, and 20 illustrative insurance policies.
 
 ### Run
 
@@ -141,6 +144,7 @@ npm start
 | GET | `/api/dashboard/store/:id` | Store dashboard aggregation |
 | GET | `/api/dashboard/region/:region` | Regional dashboard aggregation |
 | GET | `/api/dashboard/executive` | Company-to-market executive aggregation |
+| GET | `/api/insurance` | Filtered executive insurance portfolio |
 
 ## Vercel deployment
 

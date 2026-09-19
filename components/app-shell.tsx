@@ -15,7 +15,10 @@ const regionalLinks = [
   { href: "/regional-dashboard", label: "Overview" },
   { href: "/stores", label: "Stores" },
 ];
-const executiveLinks = [{ href: "/executive-dashboard", label: "Executive Overview" }];
+const executiveLinks = [
+  { href: "/executive-dashboard", label: "Sales & Inventory" },
+  { href: "/insurance", label: "Insurance" },
+];
 
 export function AppShell({ session, children }: { session: Session; children: React.ReactNode }) {
   const pathname = usePathname();

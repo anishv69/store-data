@@ -130,3 +130,25 @@ export function OperationsChart({ data }: { data: { name: string; transactions: 
     </ResponsiveContainer>
   );
 }
+
+export function PortfolioBarChart({ data, dataKey, label }: {
+  data: { name: string; coverageLimit: number; annualPremium: number }[];
+  dataKey: "coverageLimit" | "annualPremium";
+  label: string;
+}) {
+  const ranked = [...data].sort((a, b) => b[dataKey] - a[dataKey]);
+  return (
+    <ResponsiveContainer width="100%" height="100%">
+      <BarChart data={ranked} layout="vertical" margin={{ top: 4, right: 68, left: 30, bottom: 2 }} accessibilityLayer>
+        <CartesianGrid horizontal={false} stroke={grid} />
+        <XAxis type="number" axisLine={false} tickLine={false} tick={{ fill: axis, fontSize: 10 }} tickFormatter={compactCurrency} />
+        <YAxis type="category" dataKey="name" width={112} axisLine={false} tickLine={false} tick={{ fill: "#515154", fontSize: 10 }} />
+        <Tooltip formatter={(value) => [currency(Number(value)), label]} contentStyle={tooltipStyle} cursor={{ fill: "#f5f5f7" }} />
+        <Bar dataKey={dataKey} radius={[0, 8, 8, 0]} barSize={20}>
+          {ranked.map((item, index) => <Cell key={item.name} fill={palette[index % palette.length]} />)}
+          <LabelList dataKey={dataKey} position="right" formatter={(value: unknown) => compactCurrency(Number(value))} fill="#515154" fontSize={10} />
+        </Bar>
+      </BarChart>
+    </ResponsiveContainer>
+  );
+}

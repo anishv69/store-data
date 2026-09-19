@@ -13,6 +13,26 @@ enum Role {
   EXECUTIVE
 }
 
+enum InsuranceRequirement {
+  STATUTORY
+  CONTRACTUAL
+  GOVERNANCE
+  RISK_MANAGEMENT
+}
+
+enum InsuranceFinancing {
+  CAPTIVE
+  COMMERCIAL
+  HYBRID
+  STATE_PROGRAM
+}
+
+enum InsurancePolicyStatus {
+  ACTIVE
+  RENEWAL_DUE
+  EXPIRED
+}
+
 model User {
   id       Int    @id @default(autoincrement())
   name     String
@@ -84,4 +104,29 @@ model Transaction {
 
   @@index([storeId, createdAt])
   @@index([productId, createdAt])
+}
+
+model InsurancePolicy {
+  id               Int                   @id @default(autoincrement())
+  policyCode       String                @unique
+  company          String
+  coverageName     String
+  category         String
+  requirement      InsuranceRequirement
+  financing        InsuranceFinancing
+  geography        String
+  coverageLimit    Decimal               @db.Decimal(15, 2)
+  retainedAmount   Decimal               @db.Decimal(15, 2)
+  annualPremium    Decimal               @db.Decimal(15, 2)
+  effectiveDate    DateTime
+  expirationDate   DateTime
+  status           InsurancePolicyStatus
+  description      String
+  createdAt        DateTime              @default(now())
+  updatedAt        DateTime              @updatedAt
+
+  @@index([company, status])
+  @@index([category])
+  @@index([requirement])
+  @@index([expirationDate])
 }
