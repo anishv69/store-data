@@ -45,34 +45,42 @@ model User {
 }
 
 model Store {
-  id           Int           @id @default(autoincrement())
-  name         String
-  city         String
-  state        String
-  region       String
-  company      String        @default("Apple Inc")
-  area         String        @default("Apple North America")
-  countryGroup String        @default("Apple USA")
-  stateGroup   String        @default("Apple Michigan")
-  market       String        @default("Apple Detroit")
-  managerName  String
-  country      String?
-  countryCode  String?
-  continent    String?
-  latitude     Decimal?      @db.Decimal(9, 6)
-  longitude    Decimal?      @db.Decimal(9, 6)
-  timezone     String?
-  currency     String?
-  createdAt    DateTime      @default(now())
-  users        User[]
-  inventory    Inventory[]
-  transactions Transaction[]
+  id            Int           @id @default(autoincrement())
+  sourceId      String?
+  sourceUrl     String?
+  name          String
+  streetAddress String?
+  postalCode    String?
+  phone         String?
+  city          String
+  state         String
+  region        String
+  company       String        @default("Apple Inc")
+  area          String        @default("Apple North America")
+  countryGroup  String        @default("Apple USA")
+  stateGroup    String        @default("Apple Michigan")
+  market        String        @default("Apple Detroit")
+  managerName   String
+  country       String?
+  countryCode   String?
+  continent     String?
+  latitude      Decimal?      @db.Decimal(9, 6)
+  longitude     Decimal?      @db.Decimal(9, 6)
+  timezone      String?
+  currency      String?
+  isOfficial    Boolean       @default(false)
+  createdAt     DateTime      @default(now())
+  users         User[]
+  inventory     Inventory[]
+  transactions  Transaction[]
 
   @@index([state, city])
   @@index([city])
   @@index([region])
   @@index([continent, country])
   @@index([countryCode])
+  @@index([sourceId])
+  @@index([isOfficial, continent, country])
 }
 
 model Product {

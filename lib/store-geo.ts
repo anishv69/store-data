@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import type { GeoStore, GeoStoreStatus, StoreGeoResponse } from "@/types";
+import appleStoreSnapshot from "@/data/apple-stores.json";
 
 export function calculateGeoStatus(lowStockProducts: number, sales: number, averageSales: number): GeoStoreStatus {
   if (lowStockProducts >= 3) return "CRITICAL";
@@ -10,7 +11,7 @@ export function calculateGeoStatus(lowStockProducts: number, sales: number, aver
 
 export async function getStoreGeoData(): Promise<StoreGeoResponse> {
   const stores = await prisma.store.findMany({
-    where: { latitude: { not: null }, longitude: { not: null } },
+    where: { isOfficial: true, latitude: { not: null }, longitude: { not: null } },
     orderBy: [{ continent: "asc" }, { country: "asc" }, { city: "asc" }, { name: "asc" }],
   });
   const storeIds = stores.map((store) => store.id);
@@ -48,7 +49,12 @@ export async function getStoreGeoData(): Promise<StoreGeoResponse> {
 
     return {
       id: store.id,
+      sourceUrl: store.sourceUrl ?? "",
       name: store.name,
+      streetAddress: store.streetAddress ?? "",
+      postalCode: store.postalCode ?? "",
+      phone: store.phone ?? "",
+      fullAddress: [store.streetAddress, store.city, store.state, store.postalCode, store.country].filter(Boolean).join(", "),
       city: store.city,
       state: store.state,
       region: store.region,
@@ -76,6 +82,13 @@ export async function getStoreGeoData(): Promise<StoreGeoResponse> {
 
   return {
     stores: mappedStores,
+    source: {
+      label: appleStoreSnapshot.source,
+      url: appleStoreSnapshot.sourceDirectory,
+      generatedAt: appleStoreSnapshot.generatedAt,
+      displayLanguage: appleStoreSnapshot.displayLanguage,
+      localizationNote: appleStoreSnapshot.localizationNote,
+    },
     summary: {
       stores: mappedStores.length,
       countries: new Set(mappedStores.map((store) => store.countryCode)).size,

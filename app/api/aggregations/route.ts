@@ -12,10 +12,10 @@ export async function GET(request: Request) {
   const session = await getSession();
   if (!session) return NextResponse.json({ message: "Not authenticated." }, { status: 401 });
 
-  let scope: AggregationScope = {};
+  let scope: AggregationScope = session.role === "EXECUTIVE" ? { isOfficial: true } : {};
   if (session.role === "REGIONAL_MANAGER") {
     if (!session.region) return NextResponse.json({ message: "No region is assigned to this account." }, { status: 403 });
-    scope = { region: session.region };
+    scope = { region: session.region, isOfficial: true };
   }
   if (session.role === "STORE_MANAGER") {
     if (!session.storeId) return NextResponse.json({ message: "No store is assigned to this account." }, { status: 403 });

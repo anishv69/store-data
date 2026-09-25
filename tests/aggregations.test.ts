@@ -50,6 +50,12 @@ test("keeps filter values out of SQL text and binds them as parameters", () => {
   assert.equal(query.values.includes("Michigan"), true);
 });
 
+test("can restrict executive aggregations to official stores", () => {
+  const query = buildAggregationQuery({}, { isOfficial: true });
+  assert.match(query.strings.join(""), /isOfficial/);
+  assert.equal(query.values.includes(true), true);
+});
+
 test("maps overall and chart breakdown metrics", () => {
   const result = mapAggregationRows([
     overallRow,

@@ -117,7 +117,7 @@ function ExecutiveContent() {
         <MetricCard label="Inventory units" value={data.inventoryUnits.toLocaleString()} detail="Current units on hand" icon={Boxes}/>
       </section>
 
-      {geoData && <GlobalStoreMap stores={mappedStores} scopeLabel={data.label} />}
+      {geoData && <GlobalStoreMap stores={mappedStores} scopeLabel={data.label} source={geoData.source} />}
       {geoError && <div className="panel mt-5 p-5 text-sm text-[#6e6e73]">Map unavailable: {geoError}</div>}
 
       <section className="mt-5 grid gap-5 xl:grid-cols-2">

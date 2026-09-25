@@ -76,7 +76,7 @@ export async function getStoreDashboard(storeId: number) {
 }
 
 export async function getRegionalDashboard(region: string) {
-  const stores = await prisma.store.findMany({ where: { region } });
+  const stores = await prisma.store.findMany({ where: { region, isOfficial: true } });
   const storeIds = stores.map((store) => store.id);
   const [totals, today, salesByStore, countsByStore, inventories, trendRows] = await Promise.all([
     prisma.transaction.aggregate({ where: { storeId: { in: storeIds } }, _sum: { totalAmount: true }, _count: true }),
@@ -104,7 +104,7 @@ export async function getRegionalDashboard(region: string) {
 }
 
 export async function getExecutiveComparisons() {
-  const stores = await prisma.store.findMany({ orderBy: [{ region: "asc" }, { name: "asc" }] });
+  const stores = await prisma.store.findMany({ where: { isOfficial: true }, orderBy: [{ region: "asc" }, { name: "asc" }] });
   const storeIds = stores.map((store) => store.id);
   const [salesRows, inventoryRows] = await Promise.all([
     prisma.transaction.groupBy({
@@ -158,7 +158,7 @@ export async function getExecutiveComparisons() {
 const hierarchyLevels: HierarchyLevel[] = ["company", "area", "countryGroup", "stateGroup", "market"];
 
 export async function getExecutiveOptions(): Promise<ExecutiveOption[]> {
-  const stores = await prisma.store.findMany({ orderBy: { name: "asc" } });
+  const stores = await prisma.store.findMany({ where: { isOfficial: true }, orderBy: { name: "asc" } });
   const definitions: { level: HierarchyLevel; group: string }[] = [
     { level: "company", group: "Company" },
     { level: "area", group: "Geography" },
@@ -181,7 +181,7 @@ export async function getExecutiveDashboard(level: HierarchyLevel, value: string
   const nextLevel: HierarchyLevel | "store" = levelIndex === hierarchyLevels.length - 1
     ? "store"
     : hierarchyLevels[levelIndex + 1];
-  const where = { [level]: value } as Prisma.StoreWhereInput;
+  const where = { [level]: value, isOfficial: true } as Prisma.StoreWhereInput;
   const stores = await prisma.store.findMany({ where, orderBy: { name: "asc" } });
   if (!stores.length) return null;
   const storeIds = stores.map((store) => store.id);

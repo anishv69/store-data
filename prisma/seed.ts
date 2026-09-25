@@ -3,9 +3,11 @@ import {
   InsurancePolicyStatus,
   InsuranceRequirement,
   PrismaClient,
+  type Product as ProductRecord,
   Role,
 } from "@prisma/client";
 import bcrypt from "bcryptjs";
+import appleStoreSnapshot from "../data/apple-stores.json";
 
 const prisma = new PrismaClient();
 
@@ -148,33 +150,134 @@ async function main() {
     await prisma.store.deleteMany();
   }
 
-  const stores = [];
+  const coreStores = [];
   for (const item of allStoreData) {
-    const existing = await prisma.store.findFirst({ where: { name: item.name } });
-    stores.push(existing
-      ? await prisma.store.update({ where: { id: existing.id }, data: item })
-      : await prisma.store.create({ data: item }));
+    const data = { ...item, isOfficial: false };
+    const existing = await prisma.store.findFirst({ where: { name: item.name, isOfficial: false } });
+    coreStores.push(existing
+      ? await prisma.store.update({ where: { id: existing.id }, data })
+      : await prisma.store.create({ data }));
   }
-  const products = [];
+
+  const officialStoreData = appleStoreSnapshot.stores.map((item) => {
+    const countryGroup = item.countryCode === "US" ? "Apple USA" : `Apple ${item.country}`;
+    const region = ["US", "CA", "AU"].includes(item.countryCode) ? item.state : item.country;
+    return {
+      sourceId: item.sourceId,
+      sourceUrl: item.sourceUrl,
+      name: item.name,
+      streetAddress: item.streetAddress,
+      postalCode: item.postalCode,
+      phone: item.phone,
+      city: item.city,
+      state: item.state,
+      region,
+      company: "Apple Inc",
+      area: item.area,
+      countryGroup,
+      stateGroup: `Apple ${item.state}`,
+      market: `Apple ${item.city}`,
+      managerName: "Store Leadership Team",
+      country: item.country,
+      countryCode: item.countryCode,
+      continent: item.continent,
+      latitude: item.latitude,
+      longitude: item.longitude,
+      timezone: item.timezone,
+      currency: item.currency,
+      isOfficial: true,
+    };
+  });
+
+  const officialSourceIds = officialStoreData.map((store) => store.sourceId);
+  const existingOfficialStores = await prisma.store.findMany({
+    where: { sourceId: { in: officialSourceIds } },
+    select: { sourceId: true },
+  });
+  const existingSourceIds = new Set(existingOfficialStores.map((store) => store.sourceId));
+  const newOfficialStores = officialStoreData.filter((store) => !existingSourceIds.has(store.sourceId));
+  if (newOfficialStores.length) await prisma.store.createMany({ data: newOfficialStores });
+
+  const officialPayload = JSON.stringify(officialStoreData);
+  await prisma.$executeRaw`
+    UPDATE "Store" AS s SET
+      "sourceUrl" = d."sourceUrl",
+      "name" = d."name",
+      "streetAddress" = d."streetAddress",
+      "postalCode" = d."postalCode",
+      "phone" = d."phone",
+      "city" = d."city",
+      "state" = d."state",
+      "region" = d."region",
+      "company" = d."company",
+      "area" = d."area",
+      "countryGroup" = d."countryGroup",
+      "stateGroup" = d."stateGroup",
+      "market" = d."market",
+      "managerName" = d."managerName",
+      "country" = d."country",
+      "countryCode" = d."countryCode",
+      "continent" = d."continent",
+      "latitude" = d."latitude",
+      "longitude" = d."longitude",
+      "timezone" = d."timezone",
+      "currency" = d."currency",
+      "isOfficial" = d."isOfficial"
+    FROM jsonb_to_recordset(${officialPayload}::jsonb) AS d(
+      "sourceId" text,
+      "sourceUrl" text,
+      "name" text,
+      "streetAddress" text,
+      "postalCode" text,
+      "phone" text,
+      "city" text,
+      "state" text,
+      "region" text,
+      "company" text,
+      "area" text,
+      "countryGroup" text,
+      "stateGroup" text,
+      "market" text,
+      "managerName" text,
+      "country" text,
+      "countryCode" text,
+      "continent" text,
+      "latitude" numeric,
+      "longitude" numeric,
+      "timezone" text,
+      "currency" text,
+      "isOfficial" boolean
+    )
+    WHERE s."sourceId" = d."sourceId"
+  `;
+
+  const officialStores = await prisma.store.findMany({
+    where: { sourceId: { in: officialSourceIds }, isOfficial: true },
+    orderBy: { id: "asc" },
+  });
+
+  const stores = [...new Map([...coreStores, ...officialStores].map((store) => [store.id, store])).values()];
+  const coreStoreIds = new Set(coreStores.map((store) => store.id));
+  const primaryStore = officialStores.find((store) => store.sourceId === "/retail/somerset") ?? coreStores[0];
+  const products: ProductRecord[] = [];
   for (const item of productData) {
     products.push(await prisma.product.upsert({ where: { sku: item.sku }, update: item, create: item }));
   }
 
-  for (let s = 0; s < stores.length; s++) {
-    for (let p = 0; p < products.length; p++) {
-      await prisma.inventory.upsert({
-        where: { storeId_productId: { storeId: stores[s].id, productId: products[p].id } },
-        update: {},
-        create: { storeId: stores[s].id, productId: products[p].id, quantity: startingStock(s, p) },
-      });
-    }
-  }
+  await prisma.inventory.createMany({
+    data: stores.flatMap((store, storeIndex) => products.map((product, productIndex) => ({
+      storeId: store.id,
+      productId: product.id,
+      quantity: startingStock(storeIndex, productIndex),
+    }))),
+    skipDuplicates: true,
+  });
 
   const password = await bcrypt.hash("password123", 10);
   await prisma.user.upsert({
     where: { email: "store@demo.com" },
-    update: { role: Role.STORE_MANAGER, storeId: stores[0].id, region: "Michigan", password },
-    create: { name: "Olivia Chen", email: "store@demo.com", password, role: Role.STORE_MANAGER, storeId: stores[0].id, region: "Michigan" },
+    update: { role: Role.STORE_MANAGER, storeId: primaryStore.id, region: "Michigan", password },
+    create: { name: "Olivia Chen", email: "store@demo.com", password, role: Role.STORE_MANAGER, storeId: primaryStore.id, region: "Michigan" },
   });
   await prisma.user.upsert({
     where: { email: "regional@demo.com" },
@@ -188,8 +291,8 @@ async function main() {
   });
   await prisma.user.upsert({
     where: { email: "store@apple.demo" },
-    update: { role: Role.STORE_MANAGER, storeId: stores[0].id, region: "Michigan", password },
-    create: { name: "Olivia Chen", email: "store@apple.demo", password, role: Role.STORE_MANAGER, storeId: stores[0].id, region: "Michigan" },
+    update: { role: Role.STORE_MANAGER, storeId: primaryStore.id, region: "Michigan", password },
+    create: { name: "Olivia Chen", email: "store@apple.demo", password, role: Role.STORE_MANAGER, storeId: primaryStore.id, region: "Michigan" },
   });
   await prisma.user.upsert({
     where: { email: "regional@apple.demo" },
@@ -215,14 +318,15 @@ async function main() {
     });
   }
 
-  const minimumTransactionsPerStore = 260;
   const countsByStore = await prisma.transaction.groupBy({ by: ["storeId"], _count: true });
   const existingCountMap = new Map(countsByStore.map((row) => [row.storeId, row._count]));
   const now = new Date();
   const transactions = [];
   for (let storeIndex = 0; storeIndex < stores.length; storeIndex++) {
     const existingCount = existingCountMap.get(stores[storeIndex].id) ?? 0;
-    const transactionTarget = minimumTransactionsPerStore + ((storeIndex * 47) % 181);
+    const transactionTarget = coreStoreIds.has(stores[storeIndex].id)
+      ? 260 + ((storeIndex * 47) % 181)
+      : 24 + ((storeIndex * 11) % 24);
     for (let i = existingCount; i < transactionTarget; i++) {
       const ageInDays = (i * 11 + storeIndex * 7) % 180;
       const productIndex = (i * 5 + storeIndex * 3) % products.length;
@@ -236,7 +340,7 @@ async function main() {
   }
   if (transactions.length) await prisma.transaction.createMany({ data: transactions });
 
-  console.log(`Demo data ready: ${stores.length} stores, ${insuranceData.length} insurance policies, and at least ${minimumTransactionsPerStore} transactions per store.`);
+  console.log(`Demo data ready: ${officialStores.length} official map locations, ${coreStores.length} core demo stores, and ${insuranceData.length} insurance policies.`);
 }
 
 main()

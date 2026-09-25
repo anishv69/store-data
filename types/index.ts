@@ -8,7 +8,12 @@ export type Store = { id: number; name: string; city: string; state: string; reg
 export type GeoStoreStatus = "HIGH_PERFORMING" | "NORMAL" | "LOW_INVENTORY" | "CRITICAL";
 export type GeoStore = {
   id: number;
+  sourceUrl: string;
   name: string;
+  streetAddress: string;
+  postalCode: string;
+  phone: string;
+  fullAddress: string;
   city: string;
   state: string;
   region: string;
@@ -35,6 +40,13 @@ export type GeoStore = {
 
 export type StoreGeoResponse = {
   stores: GeoStore[];
+  source: {
+    label: string;
+    url: string;
+    generatedAt: string;
+    displayLanguage: string;
+    localizationNote: string;
+  };
   summary: {
     stores: number;
     countries: number;

@@ -2,7 +2,7 @@ import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import type { AggregationBreakdown, AggregationFilters, AggregationMetrics, AggregationResponse } from "@/types";
 
-export type AggregationScope = { region?: string; storeId?: number };
+export type AggregationScope = { region?: string; storeId?: number; isOfficial?: boolean };
 
 type RawAggregationRow = {
   dimension: "overall" | "state" | "city" | "product";
@@ -41,6 +41,7 @@ export function buildAggregationQuery(filters: AggregationFilters, scope: Aggreg
   const conditions: Prisma.Sql[] = [];
   if (scope.region) conditions.push(Prisma.sql`s."region" = ${scope.region}`);
   if (scope.storeId !== undefined) conditions.push(Prisma.sql`s."id" = ${scope.storeId}`);
+  if (scope.isOfficial !== undefined) conditions.push(Prisma.sql`s."isOfficial" = ${scope.isOfficial}`);
   if (filters.state) conditions.push(Prisma.sql`LOWER(s."state") = LOWER(${filters.state})`);
   if (filters.city) conditions.push(Prisma.sql`LOWER(s."city") = LOWER(${filters.city})`);
   if (filters.product) conditions.push(Prisma.sql`p."name" ILIKE ${`%${filters.product}%`}`);

@@ -41,6 +41,7 @@ Browser → Next.js UI → Route Handlers → Prisma → PostgreSQL
 - Regional KPIs derived from transactions across four Michigan stores
 - CFO dashboard with company-to-store hierarchical drill-down
 - Interactive CFO world map synchronized with the organization selector
+- 535 official store markers across 27 countries, including English/Romanized location text, full address, coordinates, phone, and Apple source link
 - Searchable store markers with sales, transactions, inventory, and performance status
 - Executive insurance dashboard with category, requirement, and status filters
 - Illustrative statutory, contractual, governance, and risk-management policy register
@@ -117,7 +118,9 @@ npx prisma migrate dev --name init
 npm run db:seed
 ```
 
-The seed creates three primary role accounts (plus backwards-compatible demo aliases), 47 stores across 15 countries, 12 products, inventory and sales history at every store, and 20 illustrative insurance policies.
+The seed creates three primary role accounts (plus backwards-compatible demo aliases), a snapshot of 535 official stores across 27 countries, 47 core demo stores, 12 products, inventory and sales history, and 20 illustrative insurance policies.
+
+The global location snapshot comes from Apple’s official country store directories and each store page’s structured address/coordinate metadata. All map-facing names and locations use English or Romanized display text while official URLs and coordinates remain unchanged. Refresh it deliberately with `npm run stores:sync`; production builds consume the checked-in `data/apple-stores.json` file and do not scrape Apple at runtime. Run `npm run stores:english` to normalize an existing snapshot without fetching it again.
 
 ### Run
 

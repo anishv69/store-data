@@ -8,7 +8,7 @@ export async function GET() {
   const where = session.role === "STORE_MANAGER"
     ? { id: session.storeId ?? -1 }
     : session.role === "REGIONAL_MANAGER"
-      ? { region: session.region ?? "" }
-      : {};
+      ? { region: session.region ?? "", isOfficial: true }
+      : { isOfficial: true };
   return NextResponse.json(await prisma.store.findMany({ where, orderBy: { name: "asc" } }));
 }
