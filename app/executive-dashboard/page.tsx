@@ -2,6 +2,7 @@
 
 import { Suspense, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Boxes, CircleDollarSign, Landmark, ReceiptText } from "lucide-react";
 import { AppShell } from "@/components/app-shell";
@@ -12,7 +13,12 @@ import { EditorialHero } from "@/components/editorial-hero";
 import { AggregationExplorer } from "@/components/aggregation-explorer";
 import { useSession } from "@/components/use-session";
 import { compactCurrency, currency } from "@/lib/format";
-import type { ExecutiveDashboard, ExecutiveLevel } from "@/types";
+import type { ExecutiveDashboard, ExecutiveLevel, GeoStore, StoreGeoResponse } from "@/types";
+
+const GlobalStoreMap = dynamic(
+  () => import("@/components/global-store-map").then((module) => module.GlobalStoreMap),
+  { ssr: false, loading: () => <div className="panel mt-5 flex h-[560px] items-center justify-center text-sm text-[#86868b]">Loading global store map...</div> },
+);
 
 const labels: Record<ExecutiveLevel, string> = {
   company: "Company",
@@ -30,7 +36,21 @@ function ExecutiveContent() {
   const level = (search.get("level") ?? "company") as ExecutiveLevel;
   const value = search.get("value") ?? "Apple Inc";
   const [data, setData] = useState<ExecutiveDashboard | null>(null);
+  const [geoData, setGeoData] = useState<StoreGeoResponse | null>(null);
   const [error, setError] = useState("");
+  const [geoError, setGeoError] = useState("");
+
+  useEffect(() => {
+    if (!session) return;
+    fetch("/api/stores/geo")
+      .then(async (response) => {
+        const body = await response.json();
+        if (!response.ok) throw new Error(body.message);
+        return body as StoreGeoResponse;
+      })
+      .then(setGeoData)
+      .catch((reason) => setGeoError(reason instanceof Error ? reason.message : "Unable to load store geography."));
+  }, [session]);
 
   useEffect(() => {
     if (!session) return;
@@ -51,6 +71,19 @@ function ExecutiveContent() {
     for (const option of data?.options ?? []) groups.set(option.group, [...(groups.get(option.group) ?? []), option]);
     return [...groups.entries()];
   }, [data]);
+
+  const mappedStores = useMemo(() => {
+    if (!geoData) return [];
+    const matches: Record<Exclude<ExecutiveLevel, "store">, (store: GeoStore) => string> = {
+      company: (store) => store.company,
+      area: (store) => store.area,
+      countryGroup: (store) => store.countryGroup,
+      stateGroup: (store) => store.stateGroup,
+      market: (store) => store.market,
+    };
+    if (level === "store") return geoData.stores.filter((store) => store.id === Number(value));
+    return geoData.stores.filter((store) => matches[level](store) === value);
+  }, [geoData, level, value]);
 
   if (loading || !session || (!data && !error)) return <LoadingScreen label="Preparing executive analysis"/>;
   if (!data) return <AppShell session={session}><div className="panel p-8"><h1 className="text-xl font-bold">Executive view unavailable</h1><p className="muted mt-2">{error}</p></div></AppShell>;
@@ -83,6 +116,9 @@ function ExecutiveContent() {
         <MetricCard label="Transactions" value={data.transactionCount.toLocaleString()} detail="Completed sales" icon={ReceiptText}/>
         <MetricCard label="Inventory units" value={data.inventoryUnits.toLocaleString()} detail="Current units on hand" icon={Boxes}/>
       </section>
+
+      {geoData && <GlobalStoreMap stores={mappedStores} scopeLabel={data.label} />}
+      {geoError && <div className="panel mt-5 p-5 text-sm text-[#6e6e73]">Map unavailable: {geoError}</div>}
 
       <section className="mt-5 grid gap-5 xl:grid-cols-2">
         <ChartPanel title="Sales momentum" subtitle="Current 12 weeks compared with the previous period"><SalesTrendChart data={data.salesTrend}/></ChartPanel>

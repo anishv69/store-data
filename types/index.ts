@@ -5,6 +5,44 @@ export type InventoryRow = { id: number; storeId: number; productId: number; qua
 export type TransactionRow = { id: number; storeId: number; productId: number; product: string; quantity: number; unitPrice: number; totalAmount: number; createdAt: string };
 export type Store = { id: number; name: string; city: string; state: string; region: string; company: string; area: string; countryGroup: string; stateGroup: string; market: string; managerName: string };
 
+export type GeoStoreStatus = "HIGH_PERFORMING" | "NORMAL" | "LOW_INVENTORY" | "CRITICAL";
+export type GeoStore = {
+  id: number;
+  name: string;
+  city: string;
+  state: string;
+  region: string;
+  company: string;
+  area: string;
+  countryGroup: string;
+  stateGroup: string;
+  market: string;
+  managerName: string;
+  country: string;
+  countryCode: string;
+  continent: string;
+  latitude: number;
+  longitude: number;
+  timezone: string;
+  currency: string;
+  sales: number;
+  transactions: number;
+  averageOrderValue: number;
+  inventoryUnits: number;
+  lowStockProducts: number;
+  status: GeoStoreStatus;
+};
+
+export type StoreGeoResponse = {
+  stores: GeoStore[];
+  summary: {
+    stores: number;
+    countries: number;
+    continents: number;
+    mappedSales: number;
+  };
+};
+
 export type StoreDashboard = {
   store: Store;
   todaySales: number;

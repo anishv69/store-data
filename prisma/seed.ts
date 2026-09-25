@@ -39,6 +39,64 @@ const storeData = [
   { name: "Mall of America", city: "Bloomington", state: "Minnesota", region: "Minnesota", company: "Apple Inc", area: "Apple North America", countryGroup: "Apple USA", stateGroup: "Apple Minnesota", market: "Apple Minneapolis", managerName: "Luna Adams" },
 ];
 
+const northAmericaGeo: Record<string, { country: string; countryCode: string; continent: string; latitude: number; longitude: number; timezone: string; currency: string }> = {
+  "Somerset Collection": { country: "United States", countryCode: "US", continent: "North America", latitude: 42.5630, longitude: -83.1850, timezone: "America/Detroit", currency: "USD" },
+  "Twelve Oaks Mall": { country: "United States", countryCode: "US", continent: "North America", latitude: 42.4880, longitude: -83.4750, timezone: "America/Detroit", currency: "USD" },
+  "Partridge Creek": { country: "United States", countryCode: "US", continent: "North America", latitude: 42.6240, longitude: -82.9530, timezone: "America/Detroit", currency: "USD" },
+  "Ann Arbor": { country: "United States", countryCode: "US", continent: "North America", latitude: 42.2808, longitude: -83.7430, timezone: "America/Detroit", currency: "USD" },
+  "Woodland Mall": { country: "United States", countryCode: "US", continent: "North America", latitude: 42.9130, longitude: -85.5830, timezone: "America/Detroit", currency: "USD" },
+  "Eastwood Towne Center": { country: "United States", countryCode: "US", continent: "North America", latitude: 42.7630, longitude: -84.5180, timezone: "America/Detroit", currency: "USD" },
+  "Fifth Avenue": { country: "United States", countryCode: "US", continent: "North America", latitude: 40.7638, longitude: -73.9725, timezone: "America/New_York", currency: "USD" },
+  "SoHo": { country: "United States", countryCode: "US", continent: "North America", latitude: 40.7250, longitude: -74.0000, timezone: "America/New_York", currency: "USD" },
+  "The Grove": { country: "United States", countryCode: "US", continent: "North America", latitude: 34.0720, longitude: -118.3570, timezone: "America/Los_Angeles", currency: "USD" },
+  "Union Square": { country: "United States", countryCode: "US", continent: "North America", latitude: 37.7880, longitude: -122.4070, timezone: "America/Los_Angeles", currency: "USD" },
+  "Eaton Centre": { country: "Canada", countryCode: "CA", continent: "North America", latitude: 43.6540, longitude: -79.3800, timezone: "America/Toronto", currency: "CAD" },
+  "Pacific Centre": { country: "Canada", countryCode: "CA", continent: "North America", latitude: 49.2830, longitude: -123.1190, timezone: "America/Vancouver", currency: "CAD" },
+  "Downtown Detroit": { country: "United States", countryCode: "US", continent: "North America", latitude: 42.3310, longitude: -83.0460, timezone: "America/Detroit", currency: "USD" },
+  "NorthPark Center": { country: "United States", countryCode: "US", continent: "North America", latitude: 32.8690, longitude: -96.7740, timezone: "America/Chicago", currency: "USD" },
+  "The Domain": { country: "United States", countryCode: "US", continent: "North America", latitude: 30.4020, longitude: -97.7260, timezone: "America/Chicago", currency: "USD" },
+  "Aventura": { country: "United States", countryCode: "US", continent: "North America", latitude: 25.9560, longitude: -80.1390, timezone: "America/New_York", currency: "USD" },
+  "Florida Mall": { country: "United States", countryCode: "US", continent: "North America", latitude: 28.4460, longitude: -81.3960, timezone: "America/New_York", currency: "USD" },
+  "Michigan Avenue": { country: "United States", countryCode: "US", continent: "North America", latitude: 41.8980, longitude: -87.6240, timezone: "America/Chicago", currency: "USD" },
+  "University Village": { country: "United States", countryCode: "US", continent: "North America", latitude: 47.6640, longitude: -122.2980, timezone: "America/Los_Angeles", currency: "USD" },
+  "Boylston Street": { country: "United States", countryCode: "US", continent: "North America", latitude: 42.3500, longitude: -71.0760, timezone: "America/New_York", currency: "USD" },
+  "Cherry Creek": { country: "United States", countryCode: "US", continent: "North America", latitude: 39.7190, longitude: -104.9530, timezone: "America/Denver", currency: "USD" },
+  "Lenox Square": { country: "United States", countryCode: "US", continent: "North America", latitude: 33.8460, longitude: -84.3620, timezone: "America/New_York", currency: "USD" },
+  "Scottsdale Quarter": { country: "United States", countryCode: "US", continent: "North America", latitude: 33.6230, longitude: -111.9250, timezone: "America/Phoenix", currency: "USD" },
+  "Tysons Corner": { country: "United States", countryCode: "US", continent: "North America", latitude: 38.9180, longitude: -77.2220, timezone: "America/New_York", currency: "USD" },
+  "Short Hills": { country: "United States", countryCode: "US", continent: "North America", latitude: 40.7390, longitude: -74.3650, timezone: "America/New_York", currency: "USD" },
+  "King of Prussia": { country: "United States", countryCode: "US", continent: "North America", latitude: 40.0880, longitude: -75.3910, timezone: "America/New_York", currency: "USD" },
+  "Mall of America": { country: "United States", countryCode: "US", continent: "North America", latitude: 44.8540, longitude: -93.2420, timezone: "America/Chicago", currency: "USD" },
+};
+
+const globalStoreData = [
+  { name: "Regent Street", city: "London", state: "England", region: "United Kingdom", company: "Apple Inc", area: "Apple Europe", countryGroup: "Apple United Kingdom", stateGroup: "Apple England", market: "Apple London", managerName: "Grace Taylor", country: "United Kingdom", countryCode: "GB", continent: "Europe", latitude: 51.5142, longitude: -0.1411, timezone: "Europe/London", currency: "GBP" },
+  { name: "Covent Garden", city: "London", state: "England", region: "United Kingdom", company: "Apple Inc", area: "Apple Europe", countryGroup: "Apple United Kingdom", stateGroup: "Apple England", market: "Apple London", managerName: "Oliver Hughes", country: "United Kingdom", countryCode: "GB", continent: "Europe", latitude: 51.5127, longitude: -0.1238, timezone: "Europe/London", currency: "GBP" },
+  { name: "Champs-Elysees", city: "Paris", state: "Ile-de-France", region: "France", company: "Apple Inc", area: "Apple Europe", countryGroup: "Apple France", stateGroup: "Apple Ile-de-France", market: "Apple Paris", managerName: "Camille Bernard", country: "France", countryCode: "FR", continent: "Europe", latitude: 48.8698, longitude: 2.3076, timezone: "Europe/Paris", currency: "EUR" },
+  { name: "Kurfurstendamm", city: "Berlin", state: "Berlin", region: "Germany", company: "Apple Inc", area: "Apple Europe", countryGroup: "Apple Germany", stateGroup: "Apple Berlin", market: "Apple Berlin", managerName: "Leon Fischer", country: "Germany", countryCode: "DE", continent: "Europe", latitude: 52.5030, longitude: 13.3290, timezone: "Europe/Berlin", currency: "EUR" },
+  { name: "Puerta del Sol", city: "Madrid", state: "Madrid", region: "Spain", company: "Apple Inc", area: "Apple Europe", countryGroup: "Apple Spain", stateGroup: "Apple Madrid", market: "Apple Madrid", managerName: "Lucia Romero", country: "Spain", countryCode: "ES", continent: "Europe", latitude: 40.4170, longitude: -3.7030, timezone: "Europe/Madrid", currency: "EUR" },
+  { name: "Piazza Liberty", city: "Milan", state: "Lombardy", region: "Italy", company: "Apple Inc", area: "Apple Europe", countryGroup: "Apple Italy", stateGroup: "Apple Lombardy", market: "Apple Milan", managerName: "Matteo Conti", country: "Italy", countryCode: "IT", continent: "Europe", latitude: 45.4642, longitude: 9.1916, timezone: "Europe/Rome", currency: "EUR" },
+  { name: "Marina Bay", city: "Singapore", state: "Singapore", region: "Singapore", company: "Apple Inc", area: "Apple Asia Pacific", countryGroup: "Apple Singapore", stateGroup: "Apple Singapore", market: "Apple Singapore", managerName: "Aiden Tan", country: "Singapore", countryCode: "SG", continent: "Asia", latitude: 1.2834, longitude: 103.8607, timezone: "Asia/Singapore", currency: "SGD" },
+  { name: "Orchard Road", city: "Singapore", state: "Singapore", region: "Singapore", company: "Apple Inc", area: "Apple Asia Pacific", countryGroup: "Apple Singapore", stateGroup: "Apple Singapore", market: "Apple Singapore", managerName: "Chloe Lim", country: "Singapore", countryCode: "SG", continent: "Asia", latitude: 1.3048, longitude: 103.8318, timezone: "Asia/Singapore", currency: "SGD" },
+  { name: "Marunouchi", city: "Tokyo", state: "Tokyo", region: "Japan", company: "Apple Inc", area: "Apple Asia Pacific", countryGroup: "Apple Japan", stateGroup: "Apple Tokyo", market: "Apple Tokyo", managerName: "Haruto Sato", country: "Japan", countryCode: "JP", continent: "Asia", latitude: 35.6814, longitude: 139.7645, timezone: "Asia/Tokyo", currency: "JPY" },
+  { name: "Shibuya", city: "Tokyo", state: "Tokyo", region: "Japan", company: "Apple Inc", area: "Apple Asia Pacific", countryGroup: "Apple Japan", stateGroup: "Apple Tokyo", market: "Apple Tokyo", managerName: "Yui Nakamura", country: "Japan", countryCode: "JP", continent: "Asia", latitude: 35.6620, longitude: 139.6997, timezone: "Asia/Tokyo", currency: "JPY" },
+  { name: "Mumbai BKC", city: "Mumbai", state: "Maharashtra", region: "India", company: "Apple Inc", area: "Apple Asia Pacific", countryGroup: "Apple India", stateGroup: "Apple Maharashtra", market: "Apple Mumbai", managerName: "Aarav Mehta", country: "India", countryCode: "IN", continent: "Asia", latitude: 19.0676, longitude: 72.8697, timezone: "Asia/Kolkata", currency: "INR" },
+  { name: "Saket", city: "New Delhi", state: "Delhi", region: "India", company: "Apple Inc", area: "Apple Asia Pacific", countryGroup: "Apple India", stateGroup: "Apple Delhi", market: "Apple Delhi", managerName: "Ananya Sharma", country: "India", countryCode: "IN", continent: "Asia", latitude: 28.5286, longitude: 77.2195, timezone: "Asia/Kolkata", currency: "INR" },
+  { name: "Pudong", city: "Shanghai", state: "Shanghai", region: "Greater China", company: "Apple Inc", area: "Apple Greater China", countryGroup: "Apple China", stateGroup: "Apple Shanghai", market: "Apple Shanghai", managerName: "Wei Zhang", country: "China", countryCode: "CN", continent: "Asia", latitude: 31.2353, longitude: 121.5020, timezone: "Asia/Shanghai", currency: "CNY" },
+  { name: "Sanlitun", city: "Beijing", state: "Beijing", region: "Greater China", company: "Apple Inc", area: "Apple Greater China", countryGroup: "Apple China", stateGroup: "Apple Beijing", market: "Apple Beijing", managerName: "Mei Lin", country: "China", countryCode: "CN", continent: "Asia", latitude: 39.9338, longitude: 116.4541, timezone: "Asia/Shanghai", currency: "CNY" },
+  { name: "Dubai Mall", city: "Dubai", state: "Dubai", region: "United Arab Emirates", company: "Apple Inc", area: "Apple Middle East", countryGroup: "Apple UAE", stateGroup: "Apple Dubai", market: "Apple Dubai", managerName: "Omar Hassan", country: "United Arab Emirates", countryCode: "AE", continent: "Asia", latitude: 25.1985, longitude: 55.2796, timezone: "Asia/Dubai", currency: "AED" },
+  { name: "Yas Mall", city: "Abu Dhabi", state: "Abu Dhabi", region: "United Arab Emirates", company: "Apple Inc", area: "Apple Middle East", countryGroup: "Apple UAE", stateGroup: "Apple Abu Dhabi", market: "Apple Abu Dhabi", managerName: "Layla Mansour", country: "United Arab Emirates", countryCode: "AE", continent: "Asia", latitude: 24.4880, longitude: 54.6070, timezone: "Asia/Dubai", currency: "AED" },
+  { name: "George Street", city: "Sydney", state: "New South Wales", region: "Australia", company: "Apple Inc", area: "Apple Asia Pacific", countryGroup: "Apple Australia", stateGroup: "Apple New South Wales", market: "Apple Sydney", managerName: "Jack Wilson", country: "Australia", countryCode: "AU", continent: "Oceania", latitude: -33.8692, longitude: 151.2067, timezone: "Australia/Sydney", currency: "AUD" },
+  { name: "Melbourne Central", city: "Melbourne", state: "Victoria", region: "Australia", company: "Apple Inc", area: "Apple Asia Pacific", countryGroup: "Apple Australia", stateGroup: "Apple Victoria", market: "Apple Melbourne", managerName: "Ruby Evans", country: "Australia", countryCode: "AU", continent: "Oceania", latitude: -37.8100, longitude: 144.9627, timezone: "Australia/Melbourne", currency: "AUD" },
+  { name: "Antara", city: "Mexico City", state: "Mexico City", region: "Mexico", company: "Apple Inc", area: "Apple Latin America", countryGroup: "Apple Mexico", stateGroup: "Apple Mexico City", market: "Apple Mexico City", managerName: "Santiago Cruz", country: "Mexico", countryCode: "MX", continent: "North America", latitude: 19.4390, longitude: -99.2010, timezone: "America/Mexico_City", currency: "MXN" },
+  { name: "Morumbi", city: "Sao Paulo", state: "Sao Paulo", region: "Brazil", company: "Apple Inc", area: "Apple Latin America", countryGroup: "Apple Brazil", stateGroup: "Apple Sao Paulo", market: "Apple Sao Paulo", managerName: "Beatriz Silva", country: "Brazil", countryCode: "BR", continent: "South America", latitude: -23.6220, longitude: -46.6990, timezone: "America/Sao_Paulo", currency: "BRL" },
+];
+
+const allStoreData = [
+  ...storeData.map((store) => ({ ...store, ...northAmericaGeo[store.name] })),
+  ...globalStoreData,
+];
+
 const productData = [
   { name: "iPhone 17 Pro", sku: "IP17PRO", category: "Phone", price: 1099 },
   { name: "iPhone 17", sku: "IP17", category: "Phone", price: 899 },
@@ -91,7 +149,7 @@ async function main() {
   }
 
   const stores = [];
-  for (const item of storeData) {
+  for (const item of allStoreData) {
     const existing = await prisma.store.findFirst({ where: { name: item.name } });
     stores.push(existing
       ? await prisma.store.update({ where: { id: existing.id }, data: item })

@@ -40,6 +40,8 @@ Browser → Next.js UI → Route Handlers → Prisma → PostgreSQL
 - Searchable, sortable transaction ledger
 - Regional KPIs derived from transactions across four Michigan stores
 - CFO dashboard with company-to-store hierarchical drill-down
+- Interactive CFO world map synchronized with the organization selector
+- Searchable store markers with sales, transactions, inventory, and performance status
 - Executive insurance dashboard with category, requirement, and status filters
 - Illustrative statutory, contractual, governance, and risk-management policy register
 - Sales-by-store and seven-day sales charts
@@ -60,6 +62,7 @@ Authentication uses a short-lived, HTTP-only demo session cookie. It is intentio
 
 - `User`: identity, role, assigned store, and region
 - `Store`: location, manager, and company/area/country/state/market hierarchy
+- Store geography includes continent, country, coordinates, timezone, and currency
 - `Product`: catalog, SKU, category, and database-owned price
 - `Inventory`: on-hand quantity for a unique store/product pair
 - `Transaction`: immutable sale quantity, unit price, total, store, product, and timestamp
@@ -114,7 +117,7 @@ npx prisma migrate dev --name init
 npm run db:seed
 ```
 
-The seed creates three primary role accounts (plus backwards-compatible demo aliases), 27 stores, 12 products, inventory and sales history at every store, and 20 illustrative insurance policies.
+The seed creates three primary role accounts (plus backwards-compatible demo aliases), 47 stores across 15 countries, 12 products, inventory and sales history at every store, and 20 illustrative insurance policies.
 
 ### Run
 
@@ -140,6 +143,7 @@ npm start
 | GET | `/api/stores/:id` | Get an accessible store |
 | GET | `/api/stores/:id/inventory` | Store inventory and product prices |
 | GET | `/api/stores/:id/transactions` | Newest-first sales history |
+| GET | `/api/stores/geo` | CFO-only global store geography and metrics |
 | POST | `/api/sales` | Atomically complete a sale |
 | GET | `/api/dashboard/store/:id` | Store dashboard aggregation |
 | GET | `/api/dashboard/region/:region` | Regional dashboard aggregation |

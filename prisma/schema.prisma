@@ -34,14 +34,14 @@ enum InsurancePolicyStatus {
 }
 
 model User {
-  id       Int    @id @default(autoincrement())
+  id       Int     @id @default(autoincrement())
   name     String
-  email    String @unique
+  email    String  @unique
   password String
   role     Role
   storeId  Int?
   region   String?
-  store    Store? @relation(fields: [storeId], references: [id])
+  store    Store?  @relation(fields: [storeId], references: [id])
 }
 
 model Store {
@@ -56,6 +56,13 @@ model Store {
   stateGroup   String        @default("Apple Michigan")
   market       String        @default("Apple Detroit")
   managerName  String
+  country      String?
+  countryCode  String?
+  continent    String?
+  latitude     Decimal?      @db.Decimal(9, 6)
+  longitude    Decimal?      @db.Decimal(9, 6)
+  timezone     String?
+  currency     String?
   createdAt    DateTime      @default(now())
   users        User[]
   inventory    Inventory[]
@@ -64,6 +71,8 @@ model Store {
   @@index([state, city])
   @@index([city])
   @@index([region])
+  @@index([continent, country])
+  @@index([countryCode])
 }
 
 model Product {
@@ -107,23 +116,23 @@ model Transaction {
 }
 
 model InsurancePolicy {
-  id               Int                   @id @default(autoincrement())
-  policyCode       String                @unique
-  company          String
-  coverageName     String
-  category         String
-  requirement      InsuranceRequirement
-  financing        InsuranceFinancing
-  geography        String
-  coverageLimit    Decimal               @db.Decimal(15, 2)
-  retainedAmount   Decimal               @db.Decimal(15, 2)
-  annualPremium    Decimal               @db.Decimal(15, 2)
-  effectiveDate    DateTime
-  expirationDate   DateTime
-  status           InsurancePolicyStatus
-  description      String
-  createdAt        DateTime              @default(now())
-  updatedAt        DateTime              @updatedAt
+  id             Int                   @id @default(autoincrement())
+  policyCode     String                @unique
+  company        String
+  coverageName   String
+  category       String
+  requirement    InsuranceRequirement
+  financing      InsuranceFinancing
+  geography      String
+  coverageLimit  Decimal               @db.Decimal(15, 2)
+  retainedAmount Decimal               @db.Decimal(15, 2)
+  annualPremium  Decimal               @db.Decimal(15, 2)
+  effectiveDate  DateTime
+  expirationDate DateTime
+  status         InsurancePolicyStatus
+  description    String
+  createdAt      DateTime              @default(now())
+  updatedAt      DateTime              @updatedAt
 
   @@index([company, status])
   @@index([category])
