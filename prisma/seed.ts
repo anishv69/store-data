@@ -142,6 +142,8 @@ const startingStock = (storeIndex: number, productIndex: number) =>
 
 async function main() {
   if (process.env.SEED_RESET === "true") {
+    await prisma.loginThrottle.deleteMany();
+    await prisma.authSession.deleteMany();
     await prisma.insurancePolicy.deleteMany();
     await prisma.transaction.deleteMany();
     await prisma.inventory.deleteMany();

@@ -5,9 +5,9 @@
   "scripts": {
     "dev": "next dev",
     "build": "npm run db:generate && next build",
-    "vercel-build": "prisma generate && prisma db push && prisma db seed && next build",
+    "vercel-build": "prisma generate && prisma db push && next build",
     "start": "next start",
-    "test": "tsx --test tests/aggregations.test.ts tests/apple-store-snapshot.test.ts tests/insurance.test.ts tests/store-geo.test.ts",
+    "test": "tsx --test tests/aggregations.test.ts tests/apple-store-snapshot.test.ts tests/auth-security.test.ts tests/insurance.test.ts tests/store-geo.test.ts",
     "stores:sync": "node scripts/sync-apple-stores.mjs",
     "stores:english": "node scripts/normalize-apple-stores-english.mjs",
     "db:generate": "cross-env DATABASE_URL=postgresql://retail_demo:retail_demo_password@localhost:5432/retail_analytics?schema=public prisma generate",

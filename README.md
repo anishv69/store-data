@@ -33,7 +33,7 @@ Browser → Next.js UI → Route Handlers → Prisma → PostgreSQL
 
 ## Features
 
-- Role-aware login and navigation
+- Role-aware login with revocable database sessions, brute-force throttling, and protected navigation
 - Store Manager dashboard with live KPIs, trends, top products, low stock, and recent transactions
 - Inventory search, stock status, and sale modal with calculated total
 - Atomic inventory decrement and transaction creation with oversell protection
@@ -57,11 +57,13 @@ Browser → Next.js UI → Route Handlers → Prisma → PostgreSQL
 | Regional Manager | `regional@apple.demo` | `password123` |
 | CFO / Executive | `cfo@apple.demo` | `password123` |
 
-Authentication uses a short-lived, HTTP-only demo session cookie. It is intentionally simple and should be replaced with a production identity provider before handling real data.
+Authentication uses an eight-hour, HTTP-only opaque session cookie. Only a SHA-256 hash of the random token is stored in PostgreSQL, roles are reloaded from the database for every request, logout revokes the server-side session, and repeated failed logins are temporarily blocked. The listed accounts remain demonstration credentials and should be replaced with a production identity provider before handling real data.
 
 ## Database schema
 
 - `User`: identity, role, assigned store, and region
+- `AuthSession`: revocable hashed session token, user, and expiration
+- `LoginThrottle`: privacy-preserving failed-login counters and temporary blocks
 - `Store`: location, manager, and company/area/country/state/market hierarchy
 - Store geography includes continent, country, coordinates, timezone, and currency
 - `Product`: catalog, SKU, category, and database-owned price
@@ -159,7 +161,9 @@ npm start
 2. Provision a managed PostgreSQL database (for example Neon, Supabase, or Vercel Marketplace Postgres).
 3. Add `DATABASE_URL` in the Vercel project settings. No `.env` file is used.
 4. Apply the schema and seed from a trusted development/CI environment.
-5. Deploy. Vercel runs `vercel-build`, which safely applies the schema, idempotently adds missing demo data, and builds Next.js. Existing sales and inventory quantities are preserved.
+5. Deploy. Vercel runs `vercel-build`, which applies the schema and builds Next.js without resetting users or reseeding production data.
+
+Seeding is deliberately excluded from normal deployments. Run `prisma db seed` only as an explicit, controlled setup step for a new demo database.
 
 For production releases, commit generated Prisma migrations and run `prisma migrate deploy` in a controlled deployment step.
 

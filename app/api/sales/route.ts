@@ -2,8 +2,10 @@ import { NextResponse } from "next/server";
 import { Prisma } from "@prisma/client";
 import { getSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { isSameOriginRequest } from "@/lib/security";
 
 export async function POST(request: Request) {
+  if (!isSameOriginRequest(request)) return NextResponse.json({ success: false, message: "Request origin is not allowed." }, { status: 403 });
   const session = await getSession();
   if (!session) return NextResponse.json({ success: false, message: "Not authenticated." }, { status: 401 });
   if (session.role !== "STORE_MANAGER") return NextResponse.json({ success: false, message: "Only store managers can complete sales." }, { status: 403 });

@@ -77,10 +77,10 @@ export default function LoginPage() {
             {error && <div className="rounded-[14px] border border-red-200 bg-red-50 px-4 py-3 text-center text-sm text-red-700">{error}</div>}
             <button disabled={loading} className="btn-primary w-full py-4! text-base!">{loading ? <><Loader2 size={18} className="animate-spin" />Signing in</> : <>Continue <ArrowRight size={18} /></>}</button>
           </form>
-          <div className="mt-7 rounded-[18px] bg-[#f5f5f7] p-4 text-xs leading-6 text-[#6e6e73]">
+          {process.env.NODE_ENV !== "production" && <div className="mt-7 rounded-[18px] bg-[#f5f5f7] p-4 text-xs leading-6 text-[#6e6e73]">
             <p><span className="font-semibold text-[#3b3b3d]">Demo emails:</span> cfo@apple.demo · regional@apple.demo · store@apple.demo</p>
             <p>Password: <span className="font-semibold text-[#3b3b3d]">password123</span></p>
-          </div>
+          </div>}
           <p className="mt-6 text-[11px] text-[#86868b]">Demonstration only. This product is not affiliated with Apple Inc.</p>
         </div>
       </section>

@@ -34,14 +34,38 @@ enum InsurancePolicyStatus {
 }
 
 model User {
-  id       Int     @id @default(autoincrement())
+  id       Int           @id @default(autoincrement())
   name     String
-  email    String  @unique
+  email    String        @unique
   password String
   role     Role
   storeId  Int?
   region   String?
-  store    Store?  @relation(fields: [storeId], references: [id])
+  store    Store?        @relation(fields: [storeId], references: [id])
+  sessions AuthSession[]
+}
+
+model AuthSession {
+  id         String   @id @default(cuid())
+  tokenHash  String   @unique @db.Char(64)
+  userId     Int
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  lastSeenAt DateTime @default(now())
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
+}
+
+model LoginThrottle {
+  keyHash         String    @id @db.Char(64)
+  failedCount     Int       @default(0)
+  windowStartedAt DateTime
+  blockedUntil    DateTime?
+  updatedAt       DateTime  @updatedAt
+
+  @@index([blockedUntil])
 }
 
 model Store {
