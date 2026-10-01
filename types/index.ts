@@ -85,6 +85,7 @@ export type ExecutiveLevel = HierarchyLevel | "store";
 export type ExecutiveOption = { level: ExecutiveLevel; value: string; label: string; group: string };
 export type RegionComparison = { name: string; sales: number; transactions: number; averageOrderValue: number; inventory: number; storeCount: number };
 export type StoreComparison = { id: number; name: string; city: string; state: string; region: string; sales: number; transactions: number; averageOrderValue: number; inventory: number };
+export type CityComparison = { city: string; state: string; region: string; sales: number; transactions: number; averageOrderValue: number; inventory: number; storeCount: number };
 
 export type AggregationFilters = { state?: string; city?: string; product?: string };
 export type AggregationMetrics = {
@@ -119,6 +120,7 @@ export type ExecutiveDashboard = {
   topProducts: { name: string; sales: number; units: number }[];
   options: ExecutiveOption[];
   regionComparison: RegionComparison[];
+  cityComparison: CityComparison[];
   storeComparison: StoreComparison[];
 };
 

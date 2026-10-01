@@ -133,6 +133,11 @@ function ExecutiveContent() {
       </section>
 
       <section className="panel mt-5 overflow-hidden">
+        <div className="border-b border-[#e8e8ed] p-5"><p className="text-sm font-semibold">Top-performing cities</p><p className="mt-1 text-xs text-[#86868b]">Cities ranked by combined store sales across the company.</p></div>
+        <div className="table-wrap"><table className="data-table"><thead><tr><th>Rank</th><th>City</th><th>Region</th><th>Sales</th><th>Stores</th><th>Transactions</th></tr></thead><tbody>{data.cityComparison.slice(0, 5).map((city, index) => <tr key={`${city.city}-${city.state}-${city.region}`}><td><span className="flex size-8 items-center justify-center rounded-lg bg-[#eaf3ff] text-xs font-bold text-[#0071e3]">{index + 1}</span></td><td><p className="font-semibold">{city.city}</p><p className="mt-1 text-xs text-[#86868b]">{city.state}</p></td><td>{city.region}</td><td className="font-semibold">{currency(city.sales)}</td><td>{city.storeCount}</td><td>{city.transactions.toLocaleString()}</td></tr>)}</tbody></table></div>
+      </section>
+
+      <section className="panel mt-5 overflow-hidden">
         <div className="border-b border-[#e8e8ed] p-5"><p className="text-sm font-semibold">Company store leaderboard</p><p className="mt-1 text-xs text-[#86868b]">Compare sales, average order value, inventory, and open any store’s detailed analysis.</p></div>
         <div className="table-wrap"><table className="data-table"><thead><tr><th>Store</th><th>Region</th><th>Sales</th><th>Avg. order</th><th>Inventory</th><th></th></tr></thead><tbody>{data.storeComparison.map((store) => <tr key={store.id}><td><p className="font-semibold">{store.name}</p><p className="mt-1 text-xs text-[#86868b]">{store.city}, {store.state}</p></td><td>{store.region}</td><td className="font-semibold">{currency(store.sales)}</td><td>{currency(store.averageOrderValue)}</td><td>{store.inventory.toLocaleString()} units</td><td className="text-right!"><Link href={`/stores/${store.id}`} className="text-xs font-semibold text-[#0071e3]">Analyze</Link></td></tr>)}</tbody></table></div>
       </section>
