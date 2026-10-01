@@ -152,7 +152,28 @@ export async function getExecutiveComparisons() {
     };
   }).sort((a, b) => b.sales - a.sales);
 
-  return { regionComparison, storeComparison };
+  const cities = new Map<string, typeof storeComparison>();
+  for (const store of storeComparison) {
+    const key = `${store.city}|${store.state}|${store.region}`;
+    cities.set(key, [...(cities.get(key) ?? []), store]);
+  }
+  const cityComparison = [...cities.values()].map((cityStores) => {
+    const firstStore = cityStores[0];
+    const sales = cityStores.reduce((sum, store) => sum + store.sales, 0);
+    const transactions = cityStores.reduce((sum, store) => sum + store.transactions, 0);
+    return {
+      city: firstStore.city,
+      state: firstStore.state,
+      region: firstStore.region,
+      sales,
+      transactions,
+      averageOrderValue: transactions ? sales / transactions : 0,
+      inventory: cityStores.reduce((sum, store) => sum + store.inventory, 0),
+      storeCount: cityStores.length,
+    };
+  }).sort((a, b) => b.sales - a.sales);
+
+  return { regionComparison, cityComparison, storeComparison };
 }
 
 const hierarchyLevels: HierarchyLevel[] = ["company", "area", "countryGroup", "stateGroup", "market"];
