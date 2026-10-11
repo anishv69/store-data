@@ -26,3 +26,6 @@ jobs:
 
       - name: Build Application
         run: npm run build
+
+      - name: Test CI Failure
+        run: exit 1
