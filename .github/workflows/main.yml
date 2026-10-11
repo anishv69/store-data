@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+
   pull_request:
     branches:
       - main
@@ -70,8 +71,30 @@ jobs:
       - name: Pull Vercel Environment
         run: vercel pull --yes --environment=production --token="$VERCEL_TOKEN"
 
+      # ==========================================
+      # Configure PostgreSQL Database
+      # ==========================================
+
+      - name: Configure Production Database
+        shell: bash
+        run: |
+          if [[ "$DATABASE_URL" != postgres://* && "$DATABASE_URL" != postgresql://* ]]; then
+            echo "::error::DATABASE_URL must start with postgres:// or postgresql://"
+            exit 1
+          fi
+
+          printf 'DATABASE_URL=%s\n' "$DATABASE_URL" >> .vercel/.env.production.local
+
+      # ==========================================
+      # Build Production Application
+      # ==========================================
+
       - name: Build Production Application
         run: vercel build --prod --token="$VERCEL_TOKEN"
+
+      # ==========================================
+      # Deploy to Production
+      # ==========================================
 
       - name: Deploy to Vercel Production
         run: vercel deploy --prebuilt --prod --token="$VERCEL_TOKEN"
